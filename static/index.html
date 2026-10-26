@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Multilingual — Powered by Sarvam AI</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom scrollbar matching WhatsApp Web */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(11, 20, 26, 0.2);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(11, 20, 26, 0.3);
+        }
+
+        /* WhatsApp chat wallpaper pattern */
+        .chat-wallpaper {
+            background-color: #efeae2;
+            background-image: 
+                radial-gradient(#d5cdc4 1px, transparent 1px),
+                radial-gradient(#d5cdc4 1px, #efeae2 1px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+        }
+
+        /* Message tail arrows */
+        .bubble-sent::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: -8px;
+            width: 0;
+            height: 0;
+            border-top: 10px solid #d9fdd3;
+            border-right: 10px solid transparent;
+        }
+        .bubble-received::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -8px;
+            width: 0;
+            height: 0;
+            border-top: 10px solid #ffffff;
+            border-left: 10px solid transparent;
+        }
+    </style>
+</head>
+<body class="bg-[#d1d7db] h-screen w-screen flex items-center justify-center font-sans overflow-hidden select-none">
+
+    <!-- Top WhatsApp Green Header Strip -->
+    <div class="fixed top-0 left-0 w-full h-32 bg-[#00a884] z-0"></div>
+
+    <!-- Main Container simulating WhatsApp Web frame -->
+    <div class="relative z-10 w-[96vw] max-w-[1600px] h-[95vh] bg-[#f0f2f5] rounded-xl shadow-2xl flex overflow-hidden border border-gray-200">
+        
+        <!-- ================= LEFT SIDEBAR ================= -->
+        <aside class="w-80 md:w-96 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
+            
+            <!-- Sidebar Header / Profile -->
+            <div class="h-16 bg-[#f0f2f5] px-4 flex items-center justify-between border-b border-gray-200">
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="openProfileModal()">
+                    <div id="userAvatar" class="w-10 h-10 rounded-full bg-[#00a884] text-white flex items-center justify-center font-bold text-lg shadow-sm">
+                        U
+                    </div>
+                    <div>
+                        <div id="displayUsername" class="text-sm font-semibold text-gray-800 leading-tight">You</div>
+                        <div class="flex items-center text-xs text-emerald-700 font-medium">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
+                            <span id="displayUserLang">Hindi</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-2 text-gray-600">
+                    <button onclick="openProfileModal()" title="Change Language / Settings" class="p-2 hover:bg-gray-200 rounded-full transition">
+                        <i data-lucide="languages" class="w-5 h-5 text-[#00a884]"></i>
+                    </button>
+                    <button onclick="switchUserPrompt()" title="Switch User / Multi-user test" class="p-2 hover:bg-gray-200 rounded-full transition">
+                        <i data-lucide="user-plus" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Active Language Banner / Switcher -->
+            <div class="bg-emerald-50 border-b border-emerald-100 p-3 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="globe-2" class="w-4 h-4 text-emerald-700"></i>
+                    <span class="text-xs font-semibold text-emerald-900">I read in:</span>
+                </div>
+                <select id="quickLangSelect" onchange="changeLanguage(this.value)" class="text-xs font-medium bg-white border border-emerald-300 rounded-md px-2 py-1 text-emerald-900 focus:outline-none focus:ring-1 focus:ring-emerald-500 shadow-sm">
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+
+            <!-- Rooms / Channels Tab Header -->
+            <div class="px-4 py-2 bg-[#f0f2f5] text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center justify-between">
+                <span>Rooms</span>
+                <span class="text-[10px] bg-gray-200 px-2 py-0.5 rounded-full text-gray-600">All Auto-Translated</span>
+            </div>
+
+            <!-- Room List -->
+            <div class="flex-1 overflow-y-auto divide-y divide-gray-100">
+                <div onclick="switchRoom('hackathon-global')" id="room-hackathon-global" class="room-item px-4 py-3 flex items-center space-x-3 cursor-pointer bg-gray-100 hover:bg-gray-50 transition border-l-4 border-[#00a884]">
+                    <div class="w-12 h-12 rounded-full bg-[#128c7e] text-white flex items-center justify-center font-bold text-xl flex-shrink-0">
+                        🇮🇳
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-semibold text-gray-900 truncate">Global Hackathon</h3>
+                            <span class="text-[11px] text-gray-400">Live</span>
+                        </div>
+                        <p class="text-xs text-gray-500 truncate mt-0.5" id="roomPreviewText">Multi-language group chat...</p>
+                    </div>
+                </div>
+
+                <div onclick="switchRoom('tech-devs')" id="room-tech-devs" class="room-item px-4 py-3 flex items-center space-x-3 cursor-pointer hover:bg-gray-50 transition">
+                    <div class="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
+                        💻
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-semibold text-gray-900 truncate">Developers Lounge</h3>
+                            <span class="text-[11px] text-gray-400">Room</span>
+                        </div>
+                        <p class="text-xs text-gray-500 truncate mt-0.5">Discuss tech in your mother tongue</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Online Participants In Current Room -->
+            <div class="p-3 bg-gray-50 border-t border-gray-200">
+                <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 flex items-center justify-between">
+                    <span>In this room</span>
+                    <span id="onlineCountBadge" class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-[10px]">1 online</span>
+                </div>
+                <div id="onlineUsersList" class="space-y-1.5 max-h-36 overflow-y-auto">
+                    <!-- Populated via WebSocket -->
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- ================= RIGHT CHAT AREA ================= -->
+        <main class="flex-1 flex flex-col bg-white overflow-hidden">
+            
+            <!-- Chat Header -->
+            <header class="h-16 bg-[#f0f2f5] px-4 flex items-center justify-between border-b border-gray-200 flex-shrink-0 z-10 shadow-sm">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-[#128c7e] text-white flex items-center justify-center font-bold text-lg shadow-sm" id="chatHeaderAvatar">
+                        🇮🇳
+                    </div>
+                    <div>
+                        <h2 id="chatHeaderTitle" class="text-sm font-semibold text-gray-900">Global Hackathon</h2>
+                        <div class="flex items-center space-x-2 text-xs text-gray-500">
+                            <span id="chatHeaderParticipants">Connecting...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <div class="hidden sm:flex items-center bg-white px-3 py-1.5 rounded-full border border-gray-300 shadow-xs text-xs text-gray-700">
+                        <span class="text-gray-400 mr-1.5">Translated by</span>
+                        <span class="font-bold text-[#00a884] flex items-center">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5 mr-1 text-[#00a884]"></i>
+                            Sarvam AI
+                        </span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Chat Messages Container -->
+            <div id="messagesContainer" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-3 chat-wallpaper">
+                
+                <!-- Security & Notice Pill -->
+                <div class="flex justify-center my-2">
+                    <div class="bg-[#ffeecd] text-[#54656f] text-[11px] px-3.5 py-1.5 rounded-lg shadow-xs text-center max-w-md border border-[#f5dfb8] flex items-center space-x-1.5">
+                        <i data-lucide="lock" class="w-3 h-3 text-amber-700 flex-shrink-0"></i>
+                        <span>Messages are translated to your chosen mother tongue in real time. Click any message to inspect the original text.</span>
+                    </div>
+                </div>
+
+                <!-- Messages inserted dynamically -->
+            </div>
+
+            <!-- Chat Input Footer -->
+            <footer class="min-h-16 bg-[#f0f2f5] px-4 py-2.5 flex items-center space-x-2 border-t border-gray-200 flex-shrink-0">
+                <button title="Emoji" class="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-200 transition">
+                    <i data-lucide="smile" class="w-6 h-6"></i>
+                </button>
+
+                <div class="flex-1 relative">
+                    <textarea 
+                        id="messageInput"
+                        rows="1"
+                        placeholder="Type a message in your mother tongue (Hindi, Tamil, English, etc.)..."
+                        onkeydown="handleInputKey(event)"
+                        class="w-full bg-white border border-transparent rounded-lg px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:border-emerald-500 shadow-xs resize-none max-h-32 leading-5"
+                    ></textarea>
+                </div>
+
+                <button 
+                    id="sendBtn"
+                    onclick="sendMessage()"
+                    class="w-10 h-10 rounded-full bg-[#00a884] hover:bg-[#069475] active:scale-95 text-white flex items-center justify-center transition shadow-md flex-shrink-0">
+                    <i data-lucide="send" class="w-5 h-5 ml-0.5"></i>
+                </button>
+            </footer>
+
+        </main>
+
+    </div>
+
+    <!-- ================= WELCOME / USER SETUP MODAL ================= -->
+    <div id="profileModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-gray-100 transform transition-all">
+            
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-[#00a884] text-white rounded-full mx-auto flex items-center justify-center mb-3 shadow-lg">
+                    <i data-lucide="message-square-more" class="w-9 h-9"></i>
+                </div>
+                <h2 class="text-xl font-bold text-gray-900">Sarvam Multilingual Chat</h2>
+                <p class="text-xs text-gray-500 mt-1">Speak your mother tongue. Everyone understands.</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Your Name</label>
+                    <input 
+                        type="text" 
+                        id="inputUsername" 
+                        placeholder="e.g. Rahul, Priya, Alex" 
+                        class="w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Your Preferred Reading Language</label>
+                    <p class="text-[11px] text-gray-500 mb-1.5">Incoming messages will be translated into this language.</p>
+                    <select 
+                        id="inputLanguage" 
+                        class="w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+                    >
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Room</label>
+                    <select 
+                        id="inputRoom" 
+                        class="w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+                    >
+                        <option value="hackathon-global">🇮🇳 Global Hackathon (Main Room)</option>
+                        <option value="tech-devs">💻 Developers Lounge</option>
+                    </select>
+                </div>
+            </div>
+
+            <button 
+                onclick="saveUserProfile()" 
+                class="mt-6 w-full bg-[#00a884] hover:bg-[#078d6f] text-white py-3 rounded-lg font-semibold text-sm shadow-md transition flex items-center justify-center space-x-2">
+                <span>Join WhatsApp Chat</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Client Logic -->
+    <script>
+        // State
+        let currentUser = {
+            id: localStorage.getItem("chat_user_id") || "u_" + Math.random().toString(36).substring(2, 9),
+            name: localStorage.getItem("chat_user_name") || "",
+            language: localStorage.getItem("chat_user_lang") || "hi-IN",
+            room: "hackathon-global"
+        };
+        localStorage.setItem("chat_user_id", currentUser.id);
+
+        let ws = null;
+        let supportedLanguages = [];
+        let messagesHistory = [];
+
+        // Colors for sender names in group chats
+        const nameColors = [
+            "text-emerald-700", "text-blue-700", "text-purple-700", 
+            "text-amber-700", "text-rose-700", "text-indigo-700", "text-teal-700"
+        ];
+        function getSenderColor(name) {
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            return nameColors[Math.abs(hash) % nameColors.length];
+        }
+
+        // Initialize UI
+        async function init() {
+            await loadLanguages();
+
+            if (!currentUser.name) {
+                openProfileModal();
+            } else {
+                updateProfileUI();
+                connectWebSocket();
+            }
+            lucide.createIcons();
+        }
+
+        async function loadLanguages() {
+            try {
+                const res = await fetch("/api/languages");
+                supportedLanguages = await res.json();
+                
+                const quickSelect = document.getElementById("quickLangSelect");
+                const modalSelect = document.getElementById("inputLanguage");
+
+                quickSelect.innerHTML = "";
+                modalSelect.innerHTML = "";
+
+                supportedLanguages.forEach(lang => {
+                    const opt1 = new Option(lang.name, lang.code);
+                    const opt2 = new Option(lang.name, lang.code);
+                    if (lang.code === currentUser.language) {
+                        opt1.selected = true;
+                        opt2.selected = true;
+                    }
+                    quickSelect.add(opt1);
+                    modalSelect.add(opt2);
+                });
+            } catch (e) {
+                console.error("Failed to load languages:", e);
+            }
+        }
+
+        function openProfileModal() {
+            document.getElementById("inputUsername").value = currentUser.name || "";
+            document.getElementById("inputLanguage").value = currentUser.language || "hi-IN";
+            document.getElementById("inputRoom").value = currentUser.room || "hackathon-global";
+            document.getElementById("profileModal").classList.remove("hidden");
+            lucide.createIcons();
+        }
+
+        function switchUserPrompt() {
+            currentUser.id = "u_" + Math.random().toString(36).substring(2, 9);
+            localStorage.setItem("chat_user_id", currentUser.id);
+            openProfileModal();
+        }
+
+        function saveUserProfile() {
+            const name = document.getElementById("inputUsername").value.trim();
+            if (!name) {
+                alert("Please enter a username.");
+                return;
+            }
+            const lang = document.getElementById("inputLanguage").value;
+            const room = document.getElementById("inputRoom").value;
+
+            currentUser.name = name;
+            currentUser.language = lang;
+            currentUser.room = room;
+
+            localStorage.setItem("chat_user_name", name);
+            localStorage.setItem("chat_user_lang", lang);
+
+            document.getElementById("profileModal").classList.add("hidden");
+            updateProfileUI();
+            connectWebSocket();
+        }
+
+        function updateProfileUI() {
+            document.getElementById("displayUsername").textContent = currentUser.name;
+            document.getElementById("userAvatar").textContent = currentUser.name.charAt(0).toUpperCase();
+
+            const langObj = supportedLanguages.find(l => l.code === currentUser.language);
+            const langName = langObj ? langObj.name.split(" ")[0] : currentUser.language;
+            document.getElementById("displayUserLang").textContent = langName;
+
+            const quickSelect = document.getElementById("quickLangSelect");
+            if (quickSelect) quickSelect.value = currentUser.language;
+        }
+
+        function switchRoom(roomId) {
+            if (currentUser.room === roomId) return;
+            currentUser.room = roomId;
+            
+            document.querySelectorAll(".room-item").forEach(el => {
+                el.classList.remove("border-l-4", "border-[#00a884]", "bg-gray-100");
+            });
+            const activeRoom = document.getElementById(`room-${roomId}`);
+            if (activeRoom) activeRoom.classList.add("border-l-4", "border-[#00a884]", "bg-gray-100");
+
+            if (roomId === "hackathon-global") {
+                document.getElementById("chatHeaderTitle").textContent = "Global Hackathon";
+                document.getElementById("chatHeaderAvatar").textContent = "🇮🇳";
+            } else {
+                document.getElementById("chatHeaderTitle").textContent = "Developers Lounge";
+                document.getElementById("chatHeaderAvatar").textContent = "💻";
+            }
+
+            document.getElementById("messagesContainer").innerHTML = `
+                <div class="flex justify-center my-2">
+                    <div class="bg-[#ffeecd] text-[#54656f] text-[11px] px-3.5 py-1.5 rounded-lg shadow-xs text-center max-w-md border border-[#f5dfb8] flex items-center space-x-1.5">
+                        <i data-lucide="lock" class="w-3 h-3 text-amber-700 flex-shrink-0"></i>
+                        <span>Switched to ${roomId}. Messages auto-translated via Sarvam AI.</span>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+            connectWebSocket();
+        }
+
+        function changeLanguage(newLang) {
+            currentUser.language = newLang;
+            localStorage.setItem("chat_user_lang", newLang);
+            updateProfileUI();
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: "change_language",
+                    language: newLang
+                }));
+            }
+        }
+
+        // WebSocket Connection
+        function connectWebSocket() {
+            if (ws) {
+                ws.close();
+            }
+
+            const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+            const wsUrl = `${protocol}//${window.location.host}/ws/${currentUser.room}?user_id=${encodeURIComponent(currentUser.id)}&username=${encodeURIComponent(currentUser.name)}&language=${encodeURIComponent(currentUser.language)}`;
+
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                console.log("Connected to room:", currentUser.room);
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+
+                if (data.type === "room_state") {
+                    renderRoomState(data);
+                } else if (data.type === "chat_message") {
+                    appendMessage(data);
+                }
+            };
+
+            ws.onclose = () => {
+                console.log("WebSocket closed. Reconnecting in 2s...");
+                setTimeout(() => {
+                    if (currentUser.name) connectWebSocket();
+                }, 2000);
+            };
+        }
+
+        function renderRoomState(data) {
+            const users = data.users || [];
+            document.getElementById("onlineCountBadge").textContent = `${users.length} online`;
+            
+            const languagesInRoom = [...new Set(users.map(u => u.language_name.split(" ")[0]))].join(", ");
+            document.getElementById("chatHeaderParticipants").textContent = `${users.length} members (${languagesInRoom})`;
+
+            const userListEl = document.getElementById("onlineUsersList");
+            userListEl.innerHTML = "";
+            users.forEach(u => {
+                const isMe = u.user_id === currentUser.id;
+                const row = document.createElement("div");
+                row.className = "flex items-center justify-between text-xs py-0.5";
+                row.innerHTML = `
+                    <div class="flex items-center space-x-1.5 truncate">
+                        <span class="w-2 h-2 rounded-full ${isMe ? 'bg-emerald-500' : 'bg-gray-400'}"></span>
+                        <span class="font-medium text-gray-800 truncate">${u.username} ${isMe ? '(You)' : ''}</span>
+                    </div>
+                    <span class="text-[10px] text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">${u.language_name.split(' ')[0]}</span>
+                `;
+                userListEl.appendChild(row);
+            });
+        }
+
+        function appendMessage(msg) {
+            const container = document.getElementById("messagesContainer");
+            const isSelf = msg.is_self;
+
+            const bubbleWrapper = document.createElement("div");
+            bubbleWrapper.className = `flex w-full ${isSelf ? 'justify-end' : 'justify-start'}`;
+
+            const senderColorClass = getSenderColor(msg.sender_name);
+            const isDifferentLang = msg.source_language_code !== msg.target_language_code;
+
+            const bubble = document.createElement("div");
+            bubble.className = `relative max-w-[85%] md:max-w-[70%] rounded-lg p-2.5 shadow-sm text-sm ${
+                isSelf 
+                    ? 'bg-[#d9fdd3] text-gray-900 bubble-sent' 
+                    : 'bg-white text-gray-900 bubble-received'
+            }`;
+
+            bubble.innerHTML = `
+                <!-- Sender Name -->
+                ${!isSelf ? `
+                    <div class="text-[11px] font-bold ${senderColorClass} mb-1 flex items-center justify-between">
+                        <span>${escapeHtml(msg.sender_name)}</span>
+                        <span class="text-[9px] font-normal text-gray-400 bg-gray-100 px-1.5 py-0.2 rounded">
+                            Typed in: ${msg.source_language_name.split(' ')[0]}
+                        </span>
+                    </div>
+                ` : `
+                    <div class="text-[10px] text-emerald-800 font-medium mb-0.5 text-right">
+                        <span>Typed in: ${msg.source_language_name.split(' ')[0]}</span>
+                    </div>
+                `}
+
+                <!-- Main Message Text (Translated to reader's chosen language) -->
+                <div class="text-[13.5px] leading-relaxed text-gray-800 break-words font-normal">
+                    ${escapeHtml(msg.translated_text)}
+                </div>
+
+                <!-- Original Message Toggle (If translated from a different language) -->
+                ${isDifferentLang ? `
+                    <div class="mt-2 pt-1.5 border-t border-gray-200/80">
+                        <button onclick="toggleOriginal('${msg.message_id}')" class="text-[11px] text-emerald-700 hover:text-emerald-900 font-medium flex items-center space-x-1 focus:outline-none">
+                            <i data-lucide="languages" class="w-3 h-3"></i>
+                            <span id="orig-btn-text-${msg.message_id}">View original (${msg.source_language_name.split(' ')[0]})</span>
+                        </button>
+                        <div id="orig-box-${msg.message_id}" class="hidden mt-1.5 p-2 bg-black/5 rounded text-xs text-gray-700 italic border-l-2 border-emerald-500">
+                            <span class="font-semibold not-italic text-[10px] text-gray-500 block mb-0.5">Original text:</span>
+                            ${escapeHtml(msg.original_text)}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <!-- Timestamp & Status -->
+                <div class="flex items-center justify-end space-x-1 mt-1 text-[10px] text-gray-400">
+                    <span>${msg.timestamp}</span>
+                    ${isSelf ? `
+                        <i data-lucide="check-check" class="w-3.5 h-3.5 text-[#53bdeb]"></i>
+                    ` : ''}
+                </div>
+            `;
+
+            bubbleWrapper.appendChild(bubble);
+            container.appendChild(bubbleWrapper);
+            container.scrollTop = container.scrollHeight;
+            lucide.createIcons();
+        }
+
+        function toggleOriginal(msgId) {
+            const box = document.getElementById(`orig-box-${msgId}`);
+            const btnText = document.getElementById(`orig-btn-text-${msgId}`);
+            if (box.classList.contains("hidden")) {
+                box.classList.remove("hidden");
+                btnText.textContent = "Hide original";
+            } else {
+                box.classList.add("hidden");
+                btnText.textContent = "View original";
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById("messageInput");
+            const text = input.value.trim();
+            if (!text || !ws || ws.readyState !== WebSocket.OPEN) return;
+
+            ws.send(JSON.stringify({
+                type: "chat_message",
+                text: text
+            }));
+
+            input.value = "";
+            input.focus();
+        }
+
+        function handleInputKey(event) {
+            if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return "";
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
