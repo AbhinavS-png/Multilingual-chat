@@ -8,8 +8,9 @@ Built for hackathons using **Sarvam AI** APIs, **FastAPI WebSockets**, and **Tai
 
 ## 🌟 Key Features
 
-- **Auto Language Identification**: Uses Sarvam AI's Language Identification API (`client.text.identify_language`) to auto-detect input language and script (Devanagari, Tamil, Bengali, Telugu, etc.).
-- **Real-Time Translation**: Powered by Sarvam AI's Translation API (`client.text.translate` using `sarvam-translate:v1`) supporting all 22 scheduled Indian languages + English.
+- **Auto Language & Script Identification**: Uses Sarvam AI's Language Identification API (`client.text.identify_language`) to auto-detect input language and whether it was typed in native script (Devanagari, Tamil, Bengali) or **Roman script (Hinglish, Tanglish, etc.)**.
+- **Roman Text & Hinglish Support**: Type naturally in Romanized script (e.g. *"mera naam abhinav hai"* or *"kya haal hai"*). Sarvam AI translates it directly into English (*"My name is Abhinav."*), Tamil (*"என் பெயர் அபிநவ்."*), or native Hindi (*"मेरा नाम अभिनव है।"*).
+- **Real-Time Translation**: Powered by Sarvam AI's Translation API (`mayura:v1` & `sarvam-translate:v1`) supporting all 22 scheduled Indian languages + English.
 - **WhatsApp Web UI**: Authentic WhatsApp interface with green branding (`#00a884`), chat doodle wallpaper, message bubbles, and blue double checkmarks (`✓✓`).
 - **"View Original" Toggle**: Every translated message has a button to inspect the untranslated text and source script as typed by the sender.
 - **Smart Translation Caching**: In-memory caching ensures that if multiple participants in a room share a language preference, Sarvam AI is queried once per unique language, maximizing speed and preserving API limits.

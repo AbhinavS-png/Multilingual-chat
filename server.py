@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from translator import ChatTranslator, SUPPORTED_LANGUAGES
+from translator import ChatTranslator, SUPPORTED_LANGUAGES, get_language_display_name
 
 app = FastAPI(title="Sarvam Multilingual WhatsApp Chat")
 
@@ -93,7 +93,7 @@ class RoomManager:
 
         # 1. Identify language using Sarvam AI
         source_lang, script = translator.detect_language(original_text)
-        source_lang_name = SUPPORTED_LANGUAGES.get(source_lang, source_lang)
+        source_lang_name = get_language_display_name(source_lang, script)
 
         # 2. Collect unique target languages needed
         needed_languages = {s.language for s in sessions}
@@ -101,17 +101,15 @@ class RoomManager:
         # 3. Translate for needed languages (using in-memory cache)
         translations: Dict[str, str] = {}
         for target_lang in needed_languages:
-            if target_lang == source_lang:
+            try:
+                translations[target_lang] = translator.translate_message(
+                    text=original_text,
+                    target_language_code=target_lang,
+                    source_language_code=source_lang,
+                    script_code=script,
+                )
+            except Exception as e:
                 translations[target_lang] = original_text
-            else:
-                try:
-                    translations[target_lang] = translator.translate_message(
-                        text=original_text,
-                        target_language_code=target_lang,
-                        source_language_code=source_lang,
-                    )
-                except Exception as e:
-                    translations[target_lang] = original_text
 
         # 4. Dispatch personalized payload to each user
         for s in list(sessions):
